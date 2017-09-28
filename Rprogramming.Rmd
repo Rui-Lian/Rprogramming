@@ -1,0 +1,26 @@
+---
+title: "Rprogramming"
+author: "lianrui"
+date: "2017年9月28日"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Contents
+Data types
+Subsetting
+Reading and writing data
+Control structures
+Functions
+Scoping
+Vectorized operations
+Dates and times
+Debugging
+Simulation
+Optimization
+
+
+
