@@ -29,11 +29,8 @@ download.file(urlTest, destfile = "./data/pml-testing.csv", method = "curl")
 
 Read data into R. 
 ```{r}
-?read.table
-Training <- read.table("./data/pml-training.csv", header = TRUE, sep = ",")
-Testing <- read.table("./data/pml-testing.csv", header = TRUE, sep = ",")
-dim(Training)
-dim(Testing)
+training <- read.table("./data/pml-training.csv", header = TRUE, sep = ",")
+testing <- read.table("./data/pml-testing.csv", header = TRUE, sep = ",")
 ```
 
 

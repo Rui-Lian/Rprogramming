@@ -112,8 +112,8 @@ msg
 
 The grammar of the language determines whether an expression is complete or not.
 
-```{}
-> x <-  ## Incomplete expression
+```{r}
+x <-  ## Incomplete expression
 ```
 
 The # character indicates a comment. Anything to the right of the # (including the # itself) is ignored.
@@ -160,10 +160,9 @@ x <- c(1+0i, 2+4i)     ## complex
 
 Using the `vector()` function
 
-```r
-> x <- vector("numeric", length = 10) 
-> x
- [1] 0 0 0 0 0 0 0 0 0 0
+```{r}
+x <- vector("numeric", length = 10) 
+x
 ```
 
 ---
@@ -186,16 +185,16 @@ When different objects are mixed in a vector, _coercion_ occurs so that every el
 
 Objects can be explicitly coerced from one class to another using the `as.*` functions, if available.
 
-```r
-> x <- 0:6
-> class(x)
-[1] "integer"
-> as.numeric(x)
-[1] 0 1 2 3 4 5 6
-> as.logical(x)
-[1] FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
-> as.character(x)
-[1] "0" "1" "2" "3" "4" "5" "6"
+```{r}
+x <- 0:6
+class(x)
+
+as.numeric(x)
+
+as.logical(x)
+
+as.character(x)
+
 ```
 
 ---
