@@ -33,5 +33,27 @@ training <- read.table("./data/pml-training.csv", header = TRUE, sep = ",")
 testing <- read.table("./data/pml-testing.csv", header = TRUE, sep = ",")
 ```
 
+Looking at data
+```{r, fig.width=15, fig.height=10}
+
+sampleDat <- training[sample(nrow(training), 2000), ]
+library(AppliedPredictiveModeling)
+transparentTheme(trans = .2)
+library(caret)
+featurePlot(x = sampleDat[, 61:70], 
+            y = sampleDat$classe, 
+            plot = "pairs")
+```
+
+
+
+
+## Removing the v
+```{r}
+library(caret)
+nsv <- nearZeroVar(training,saveMetrics=TRUE)
+nsv
+subset(nsv)[nsv$nzv == TRUE, ]
+```
 
 
