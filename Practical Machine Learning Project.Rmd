@@ -38,9 +38,9 @@ Looking at data
 
 sampleDat <- training[sample(nrow(training), 2000), ]
 library(AppliedPredictiveModeling)
-transparentTheme(trans = .2)
+transparentTheme(trans = .4)
 library(caret)
-featurePlot(x = sampleDat[, 61:70], 
+featurePlot(x = sampleDat[, 1:10], 
             y = sampleDat$classe, 
             plot = "pairs")
 ```
