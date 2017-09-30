@@ -30,30 +30,32 @@ download.file(urlTest, destfile = "./data/pml-testing.csv", method = "curl")
 Read data into R. 
 ```{r}
 training <- read.table("./data/pml-training.csv", header = TRUE, sep = ",")
+dim(training)
 testing <- read.table("./data/pml-testing.csv", header = TRUE, sep = ",")
 ```
 
-Looking at data
-```{r, fig.width=15, fig.height=10}
 
-sampleDat <- training[sample(nrow(training), 2000), ]
-library(AppliedPredictiveModeling)
-transparentTheme(trans = .4)
-library(caret)
-featurePlot(x = sampleDat[, 1:10], 
-            y = sampleDat$classe, 
-            plot = "pairs")
-```
-
-
-
-
-## Removing the v
+## creating dummy variables for factors. 
 ```{r}
-library(caret)
-nsv <- nearZeroVar(training,saveMetrics=TRUE)
-nsv
-subset(nsv)[nsv$nzv == TRUE, ]
+training.dmy <- model.matrix(classe ~ ., data = training)
+dim(training.dmy)
 ```
 
+
+## Removing the zero and near zero
+```{r}
+nzv <- nearZeroVar(training.dmy)
+
+filteredTraining <- training.dmy[, -nzv]
+dim(filteredTraining)
+dim(training)
+```
+
+```{r}
+trainCor <- cor(filteredTraining)
+highCorr <- sum(abs(trainCor[upper.tri(trainCor)]) > .999)
+highCorr
+
+summary(trainCor[upper.tri(trainCor)])
+```
 
