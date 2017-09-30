@@ -35,17 +35,17 @@ testing <- read.table("./data/pml-testing.csv", header = TRUE, sep = ",")
 ```
 
 
-## creating dummy variables for factors. 
+## creating dummy variables for factors 1, dummy first. 
 ```{r}
 training.dmy <- model.matrix(classe ~ ., data = training)
 dim(training.dmy)
 ```
 
 
-## Removing the zero and near zero
+## Removing the zero and near zero 1, dummy first
 ```{r}
 nzv <- nearZeroVar(training.dmy)
-
+?nearZeroVar
 filteredTraining <- training.dmy[, -nzv]
 dim(filteredTraining)
 dim(training)
@@ -53,9 +53,10 @@ dim(training)
 
 ```{r}
 trainCor <- cor(filteredTraining)
+trainCor
 highCorr <- sum(abs(trainCor[upper.tri(trainCor)]) > .999)
 highCorr
-
+?upper.tri
 summary(trainCor[upper.tri(trainCor)])
 ```
 

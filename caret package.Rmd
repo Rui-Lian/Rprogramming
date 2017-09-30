@@ -1,0 +1,104 @@
+---
+title: "caret package take home"
+author: "lianrui"
+date: "2017年9月30日"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+## Visualizations
+```{r, fig.width=12, fig.height=12}
+data(iris)
+library(AppliedPredictiveModeling)
+transparentTheme(trans = .4)
+library(caret)
+featurePlot(x = iris[, 1:4], 
+            y = iris$Species, 
+            plot = "pairs",
+            ## Add a key at the top
+            auto.key = list(columns = 3))
+```
+
+```{r, fig.height=12, fig.width=12}
+featurePlot(x = iris[, 1:4], 
+            y = iris$Species, 
+            plot = "ellipse",
+            ## Add a key at the top
+            auto.key = list(columns = 3))
+```
+
+
+```{r}
+transparentTheme(trans = .9)
+featurePlot(x = iris[, 1:4], 
+            y = iris$Species,
+            plot = "density", 
+            ## Pass in options to xyplot() to 
+            ## make it prettier
+            scales = list(x = list(relation="free"), 
+                          y = list(relation="free")), 
+            adjust = 1.5, 
+            pch = "|", 
+            layout = c(4, 1), 
+            auto.key = list(columns = 3))
+```
+
+```{r}
+featurePlot(x = iris[, 1:4], 
+            y = iris$Species, 
+            plot = "box", 
+            ## Pass in options to bwplot() 
+            scales = list(y = list(relation="free"),
+                          x = list(rot = 90)),  
+            layout = c(4,1 ), 
+            auto.key = list(columns = 2))
+```
+
+```{r}
+
+```
+
+## preprocessing
+### Creating dummy variables
+Two approaches of creating dummy variables for factors:
+* 1. model.matrix in R base
+* 2. dummyVars in caret package
+
+In model.matrix, the first variable is taken as intercept. 
+In contrast, dummyVars will return just a matrix, No intercept is returns, this is not useful some models requiring dependents and predicters, e.g., lm. 
+
+```{r}
+library(earth)
+data(etitanic)
+head(etitanic)
+str(etitanic)
+# etitanic has two factor variable, pclass, sex
+model.matrix(survived ~ ., data = etitanic)
+?model.matrix
+
+head(model.matrix(survived ~ ., data = etitanic))
+```
+
+
+```{r}
+dummies <- dummyVars(survived ~ ., data = etitanic)
+head(dummies)
+head(predict(dummies, newdata = etitanic))
+```
+
+
+### Zero- and Near Zero-Variance Predictors
+
+example
+```{r}
+data(mdrr)
+nzv <- nearZeroVar(mdrrDescr, saveMetrics = TRUE)
+str(nzv)
+nzv[nzv$nzv,][1:10,]
+```
+
