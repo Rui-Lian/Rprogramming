@@ -29,10 +29,17 @@ download.file(urlTest, destfile = "./data/pml-testing.csv", method = "curl")
 
 Read data into R. 
 ```{r}
-training <- read.table("./data/pml-training.csv", header = TRUE, sep = ",")
+pmlTrain <- read.table("./data/pml-training.csv", header = TRUE, sep = ",")
 dim(training)
-testing <- read.table("./data/pml-testing.csv", header = TRUE, sep = ",")
+pmlTest <- read.table("./data/pml-testing.csv", header = TRUE, sep = ",")
+
 ```
+
+
+
+
+
+
 
 
 ## creating dummy variables for factors 1, dummy first. 
