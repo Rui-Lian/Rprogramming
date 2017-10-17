@@ -27,43 +27,59 @@ download.file(urlTrain, destfile = "./data/pml-training.csv", method = "curl")
 download.file(urlTest, destfile = "./data/pml-testing.csv", method = "curl")
 ```
 
-Read data into R. 
-```{r}
+
+```{r, Read data into R}
 pmlTrain <- read.table("./data/pml-training.csv", header = TRUE, sep = ",")
-dim(training)
 pmlTest <- read.table("./data/pml-testing.csv", header = TRUE, sep = ",")
-
+dim(pmlTrain);dim(pmlTest);table(pmlTrain$classe)
 ```
 
 
+## 1. linear model. 
 
-
-
-
-
-
-## creating dummy variables for factors 1, dummy first. 
+### data splitting. 
 ```{r}
-training.dmy <- model.matrix(classe ~ ., data = training)
-dim(training.dmy)
+inTrain <- createDataPartition(y=pmlTrain$classe, p=0.7, list=FALSE)
+train <- pmlTrain[inTrain, ]
+trainCls <- train$classe
+test <- pmlTrain[-inTrain,]
+testCls <- test$classe
+dim(train);dim(test)
 ```
 
 
-## Removing the zero and near zero 1, dummy first
+### Removing the zero and near zero variables. 
 ```{r}
-nzv <- nearZeroVar(training.dmy)
-?nearZeroVar
-filteredTraining <- training.dmy[, -nzv]
-dim(filteredTraining)
-dim(training)
+nzv.train <- nearZeroVar(train)
+train<- train[, -nzv]
+train$classe <- as.factor(train.small$classe)
+dim(train)
 ```
 
+
+### Missing value imputation with knnImpute. 
 ```{r}
-trainCor <- cor(filteredTraining)
-trainCor
-highCorr <- sum(abs(trainCor[upper.tri(trainCor)]) > .999)
-highCorr
-?upper.tri
-summary(trainCor[upper.tri(trainCor)])
+prep <- preProcess(train, 
+                    method = c("knnImpute"))
+train <- predict(prep, newdata = train[, -100])
+train <- train[, -c(2, 5)]
+```
+
+
+### feature selection using correlation. 
+```{r}
+trainCor <- cor(train)
+highlyCorrelated <- findCorrelation(trainCor, cutoff=0.75)
+train <- train[, -highlyCorrelated]
+dim(train)
+train <- data.frame(train, classe = trainCls)
+str(train)
+```
+
+
+### random forest. 
+```{r}
+modFit <- train(classe ~ ., data=train, method="rf", prox = TRUE)
+
 ```
 

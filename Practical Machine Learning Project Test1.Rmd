@@ -1,0 +1,185 @@
+---
+title: "Practical Machine Learning Project"
+author: "lianrui"
+date: "2017年9月28日"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Background and objectives
+    Inertial detectors are used to monitor subjects' activities. Data could be modeled to predict the type and quality of subjects' activity. 
+    In this project, dumbbell lifting subjects were monitored by 9 degrees inertial measurement unit(IMU) attatched to 1: arm, 2: belt; 3:dumbbell. Sujbects are asked to perform the "right" lifting and "wrong" lifting. 
+    Further information for the data generation could be found:http://groupware.les.inf.puc-rio.br/har. 
+    The objectives of this analysis is to select features from hundreds of predictors and model the type of activity with key predictors. 
+    Further, Model will be applied to test dataset.  
+    
+## Executive summary
+
+## Getting the data
+
+```{r}
+library(caret)
+library(ggplot2)
+```
+
+
+```{r, create data directory}
+if (!file.exists("data")) {
+    dir.create("data")
+}
+```
+
+
+```{r, downloading data, echo=FALSE}
+urlTrain <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+urlTest <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+download.file(urlTrain, destfile = "./data/pml-training.csv", method = "curl")
+download.file(urlTest, destfile = "./data/pml-testing.csv", method = "curl")
+```
+
+
+```{r, Read data into R}
+pmlTrain <- read.table("./data/pml-training.csv", header = TRUE, sep = ",")
+pmlTest <- read.table("./data/pml-testing.csv", header = TRUE, sep = ",")
+dim(pmlTrain);dim(pmlTest);table(pmlTrain$classe)
+```
+
+
+### data preparation: zero, near-near removing.  
+```{r}
+set.seed(38360)
+nzvTrain <- nearZeroVar(pmlTrain)
+nzvTest <- nearZeroVar(pmlTest)
+nzv <- unique(c(nzvTrain, nzvTest))
+rDat <- pmlTrain[, -nzv]
+test20 <- pmlTest[, -nzv]
+rDatCls <- as.factor(rDat$classe)
+rDat <- rDat[, -c(2, 5)]
+test20 <- test20[, -c(2, 5)]
+```
+
+
+### feature selection using correlation. 
+```{r}
+set.seed(38360)
+rDatCor <- cor(rDat[,-57])
+highlyCorrelated <- findCorrelation(rDatCor, cutoff=0.75)
+rDatFinal <- rDat[, -highlyCorrelated]
+dim(rDatFinal)
+test20Final <- test20[, -highlyCorrelated]
+dim(test20Final)
+names(rDatFinal); names(test20Final)
+```
+
+```{r}
+for (i in 1:34){
+        fplot <- featurePlot(x=rDatFinal[,i],
+            y = rDatFinal$classe,
+            plot="density", 
+            alpha = 0.8)
+        print(fplot)
+        
+}
+```
+
+
+
+
+```{r}
+rDatFinal <- rDatFinal[, -c(1, 2, 3, 4, 23, 28, 29)]
+dim(rDatFinal)
+test20Final <- test20Final[, -c(1, 2, 3, 4, 23, 28, 29)]
+dim(test20Final)
+```
+
+
+### data partition
+```{r}
+inTrain <- createDataPartition(rDatFinal$classe, p = 0.75, list = FALSE)
+train <- rDatFinal[inTrain,]
+test <- rDatFinal[-inTrain,]
+dim(train)
+```
+
+
+```{r}
+fitControl <- trainControl(## 10-fold CV
+                           method = "repeatedcv",
+                           number = 5,
+                           ## repeated ten times
+                           repeats = 10)
+```
+
+
+### random forest. 
+```{r}
+rf_Fit <- train(classe ~ ., data = train, 
+                 method = "rf", 
+                 trControl = fitControl,
+                 proximity = TRUE)
+rf_Fit
+
+```
+
+
+
+### the variable importance. 
+```{r}
+vImp <- varImp(rf_Fit)
+order(vImp$importance);names(train)
+```
+
+```{r}
+featurePlot(x=train[,2],
+            y = train$classe,
+            plot="density", 
+            alpha = 0.8)
+```
+
+
+### evaluate and test the test dataset. 
+```{r}
+predictions <- predict(rf_Fit, newdata = test[, -35])
+```
+
+
+```{r}
+table(test$classe)
+confusionMatrix(predictions, test$classe)
+```
+
+### evalute the in-sample error. 
+
+### evalute the out-of-sample error. 
+```{r, fig.width = 10, fig.height = 10}
+test$pred <- as.factor(predictions)
+test$classe <- as.factor(test$classe)
+library(ggplot2)
+library(gridExtra)
+test$predRight <- test$pred==test$classe
+testNew <- test[which(test$predRight == FALSE), ]
+for (i in 1:27){
+        g <- ggplot(data = test, aes(x = classe, y = test[, i]))
+        g <- g + geom_boxplot(aes(colour = classe))
+        g <- g + geom_jitter(alpha = 0.2, colour = "steelblue")
+        g <- g + geom_point(data = testNew, aes(x = classe, y = testNew[, i]),colour = "orange", size = 10, alpha = 0.2)
+        g <- g + ggtitle(names(test)[i])
+        print(g)
+}
+```
+
+
+
+
+### predict the 20 samples. 
+```{r}
+str(test20Final)
+test20predict <- predict(rf_Fit, newdata = test20Final[, -28])
+test20predict
+
+```
+
+
